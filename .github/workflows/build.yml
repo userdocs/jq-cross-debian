@@ -169,8 +169,6 @@ jobs:
             arch: i386
           - platforms: "linux/mips64le"
             arch: mips64el
-          - platforms: "linux/mips64"
-            arch: mips64
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -178,11 +176,11 @@ jobs:
       - name: Host - Download artifacts
         uses: actions/download-artifact@v3
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Log in to the Container registry
         uses: docker/login-action@v2
@@ -212,7 +210,7 @@ jobs:
     if: always() && contains(needs.*.result, 'success') && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     env:
       GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-      jq_version: ${{ needs.build.outputs.jq_version }}
+      jq_version: ${{ needs.cross_build.outputs.jq_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
