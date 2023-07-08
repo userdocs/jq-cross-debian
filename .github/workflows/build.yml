@@ -9,9 +9,10 @@ concurrency:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
-  build:
+  cross_build:
     runs-on: ubuntu-latest
     outputs:
       jq_version: ${{ steps.version_info.outputs.jq_version }}
@@ -132,10 +133,81 @@ jobs:
           name: "jq-${{ matrix.arch }}"
           path: "jq-${{ matrix.arch }}"
 
+  docker_build:
+    name: docker_build
+    runs-on: ubuntu-latest
+    needs: cross_build
+    strategy:
+      fail-fast: false
+      matrix:
+        platforms:
+          [
+            "linux/amd64",
+            "linux/arm64",
+            "linux/arm/v7",
+            "linux/arm/v6",
+            "linux/ppc64le",
+            "linux/s390x",
+            "linux/386",
+            "linux/mips64le",
+            "linux/mips64",
+          ]
+        include:
+          - platforms: "linux/amd64"
+            arch: amd64
+          - platforms: "linux/arm64"
+            arch: arm64
+          - platforms: "linux/arm/v7"
+            arch: armhf
+          - platforms: "linux/arm/v6"
+            arch: armel
+          - platforms: "linux/ppc64le"
+            arch: ppc64el
+          - platforms: "linux/s390x"
+            arch: s390x
+          - platforms: "linux/386"
+            arch: i386
+          - platforms: "linux/mips64le"
+            arch: mips64el
+          - platforms: "linux/mips64"
+            arch: mips64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Host - Download artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          no-cache: true
+          platforms: ${{ matrix.platforms }}
+          tags: ghcr.io/${{ github.repository }}:jq
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            ARCH=${{ matrix.arch }}
+
   release:
     name: Upload artifacts to release
     runs-on: ubuntu-latest
-    needs: build
+    needs: docker_build
     if: always() && contains(needs.*.result, 'success') && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')
     env:
       GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
