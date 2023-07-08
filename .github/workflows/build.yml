@@ -150,7 +150,6 @@ jobs:
             "linux/s390x",
             "linux/386",
             "linux/mips64le",
-            "linux/mips64",
           ]
         include:
           - platforms: "linux/amd64"
