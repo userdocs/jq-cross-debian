@@ -1,7 +1,6 @@
-FROM debian:latest
+FROM --platform=${BUILDPLATFORM} debian:latest
 
-SHELL ["/bin/bash", "-c"]
-
+ARG PLATFORM
 ARG ARCH
 
 COPY jq-${ARCH} /usr/local/bin/jq

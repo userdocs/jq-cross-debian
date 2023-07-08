@@ -203,6 +203,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             ARCH=${{ matrix.arch }}
+            PLATFORM=${{ matrix.platforms }}
 
   release:
     name: Upload artifacts to release
