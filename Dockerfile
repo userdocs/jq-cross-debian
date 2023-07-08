@@ -1,4 +1,4 @@
-FROM --platform=${BUILDPLATFORM} debian:latest
+FROM --platform=${PLATFORM} debian:latest
 
 ARG PLATFORM
 ARG ARCH
