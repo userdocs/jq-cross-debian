@@ -155,7 +155,7 @@ jobs:
         run: |
           mkdir -p "releases"
           for files in jq-*; do
-              mv -rf ${files}/* "releases/"
+              mv -f ${files}/* "releases/"
           done
 
       - name: Host - "Create release - tag - assets"
