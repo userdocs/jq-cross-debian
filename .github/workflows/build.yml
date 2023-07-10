@@ -9,7 +9,6 @@ concurrency:
 
 permissions:
   contents: write
-  packages: write
 
 jobs:
   cross_build:
@@ -133,7 +132,7 @@ jobs:
       - name: Docker - upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: "jq-${{ matrix.arch }}"
+          name: "jq-linux"
           path: "jq-${{ matrix.arch }}"
 
   release:
@@ -151,18 +150,11 @@ jobs:
       - name: Host - Download artifacts
         uses: actions/download-artifact@v3
 
-      - name: Host - artifacts organise for release
-        run: |
-          mkdir -p "releases"
-          for files in jq-*; do
-              mv -f ${files}/* "releases/"
-          done
-
       - name: Host - "Create release - tag - assets"
         uses: ncipollo/release-action@v1
         with:
           prerelease: false
-          artifacts: releases/jq-*
+          artifacts: jq-linux/jq-*
           replacesArtifacts: true
           tag: ${{ env.jq_version }}
           name: "jq ${{ env.jq_version }}"
