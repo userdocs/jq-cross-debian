@@ -152,4 +152,4 @@ jobs:
 
       - name: release gh cli
         run: |
-          gh release create ${{ env.jq_version }} ./jq-linux/jq-* --latest --title "jq ${{ env.jq_version }}" --notes "jq built from github master and statically linked"
+          gh release edit ${{ env.jq_version }} ./jq-linux/jq-* --latest --title "jq ${{ env.jq_version }}" --notes "jq built from github master and statically linked"
