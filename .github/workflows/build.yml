@@ -150,13 +150,6 @@ jobs:
       - name: Host - Download artifacts
         uses: actions/download-artifact@v3
 
-      - name: Host - "Create release - tag - assets"
-        uses: ncipollo/release-action@v1
-        with:
-          prerelease: false
-          artifacts: jq-linux/jq-*
-          replacesArtifacts: true
-          tag: ${{ env.jq_version }}
-          name: "jq ${{ env.jq_version }}"
-          body: "jq built from github master and statically linked"
-          allowUpdates: true
+      - name: release gh cli
+        run: |
+          gh release create ${{ env.jq_version }} ./jq-linux/jq-* --latest --title "jq ${{ env.jq_version }}" --notes "jq built from github master and statically linked"
